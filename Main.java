@@ -1,11 +1,11 @@
 package com.company;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Comparator;
 
 import static java.lang.System.out;
 
@@ -16,6 +16,7 @@ enum CodeCar {
     C400
 }
 
+// Не хочу делать несколько файлов, поэтому класс Car без модификатора public
 class Car {
     private CodeCar code_car;
     private int number;
@@ -38,21 +39,13 @@ class Car {
         }
     }
 
-    public CodeCar get_code_car() {
-        return code_car;
-    }
+    public CodeCar get_code_car() { return code_car; }
 
-    public int get_number() {
-        return number;
-    }
+    public int get_number() { return number; }
 
-    public int get_mileage() {
-        return mileage;
-    }
+    public int get_mileage() { return mileage; }
 
-    public int get_additional_param() {
-        return additional_param;
-    }
+    public int get_additional_param() { return additional_param; }
 
     private double get_fuel_cost() {
         return switch (code_car) {
@@ -71,17 +64,15 @@ class Car {
         };
     }
 
-    public double get_full_fuel_cost() {
-        return mileage / 100. * get_fuel_cost() * get_fuel_consumption();
-    }
+    public double get_full_fuel_cost() { return mileage / 100. * get_fuel_cost() * get_fuel_consumption(); }
 }
 
 class Main {
 
     public static void main(String[] args) {
-        String[] input_cars = { "C100_1-100",   "C200_1-120-1200",  "C300_1-120-30", "C400_1-80-20",
-                                "C100_2-50",    "C200_2-40-1000",   "C300_2-200-45", "C400_2-10-20",
-                                "C100_3-10",    "C200_3-170-1100",  "C300_3-150-29", "C400_3-100-28",
+        String[] input_cars = { "C100_1-100",   "C200_1-120-1200",  "C300_1-120-30",    "C400_1-80-20",
+                                "C100_2-50",    "C200_2-40-1000",   "C300_2-200-45",    "C400_2-10-20",
+                                "C100_3-10",    "C200_3-170-1100",  "C300_3-150-29",    "C400_3-100-28",
                                 "C100_1-300",   "C200_1-100-750",   "C300_1-32-15" };
 
         List<Car> all_cars = new ArrayList<>();
@@ -98,9 +89,8 @@ class Main {
                 case C400 -> fuel_cost[3] += car.get_full_fuel_cost();
             }
         }
-
-        double total_fuel_cost = Arrays.stream(fuel_cost).sum();
-        out.println("Общая стоимость топлива = " + total_fuel_cost);
+        
+        out.println("Общая стоимость топлива = " + Arrays.stream(fuel_cost).sum());
 
         for (int i = 0; i < CodeCar.values().length; i++)
             out.println(
@@ -121,19 +111,21 @@ class Main {
         out.println("Наиболее дешёвый в обслуживании тип транспорта - это " +
                 get_type_name(CodeCar.values()[fuel_cost_min_at]));
 
+        var all_cars_dict = get_cars_dict(all_cars);
+        for (CodeCar code_car : CodeCar.values()) {
+            out.println("Детализация по типу " + get_type_name(code_car));
 
-        for (CodeCar codeCar : CodeCar.values()) {
-            out.println("Детализация по типу " + get_type_name(codeCar));
-
-            var needed_cars = get_needed_cars(codeCar, all_cars);
+            var needed_cars = all_cars_dict.get(code_car);
+            needed_cars.sort(Comparator.comparing(Car::get_mileage).thenComparing((Car::get_additional_param)));
 
             for (Car car : needed_cars) {
                 String additional_param = "отсутствует";
-                if (car.get_additional_param() != -1) additional_param = Integer.toString(car.get_additional_param());
+                if (car.get_additional_param() != -1)
+                    additional_param = Integer.toString(car.get_additional_param());
 
-                out.println("Гос номер: " + car.get_number() +
-                            ", пробег: " + car.get_mileage() +
-                            ", доп параметр: " + additional_param
+                out.println("Гос номер: "       + car.get_number() +
+                            ", пробег: "        + car.get_mileage() +
+                            ", доп параметр: "  + additional_param
                 );
             }
         }
@@ -148,27 +140,14 @@ class Main {
         };
     }
 
-    public static List<Car> get_needed_cars(CodeCar needed_code_car, List<Car> all_cars) {
-        List<Car> needed_cars = new ArrayList<>();
+    public static Map<CodeCar, List<Car>> get_cars_dict(List<Car> all_cars) {
+        Map<CodeCar, List<Car>> all_cars_dict = new HashMap<>();
+        for (CodeCar code_car: CodeCar.values())
+            all_cars_dict.computeIfAbsent(code_car, ignored -> new ArrayList<>());
 
-        for (Car car : all_cars) if (car.get_code_car() == needed_code_car) needed_cars.add(car);
+        for (Car car : all_cars)
+            all_cars_dict.get(car.get_code_car()).add(car);
 
-        needed_cars.sort(Comparator.comparing(Car::get_mileage).thenComparing((Car::get_additional_param)));
-
-        return needed_cars;
+        return all_cars_dict;
     }
-
-//    public static Map<CodeCar, List<Car>> get_cars_dict(List<Car> all_cars) {
-//        Map<CodeCar, List<Car>> cars_dict = new HashMap<>();
-//        for (CodeCar code_car: CodeCar.values()) cars_dict.computeIfAbsent(code_car, ignored -> new ArrayList<>());
-//
-//        for (Car car : all_cars) cars_dict.get(car.get_code_car()).add(car);
-//
-//        ArrayList<Map.Entry<String, ArrayList<Integer>>> list = new ArrayList<>(cars_dict.entrySet());
-//        Collections.sort(list, new EntryComparator());
-//
-//        needed_cars.sort(Comparator.comparing(Car::get_mileage).thenComparing((Car::get_additional_param)));
-//
-//        return cars_dict;
-//    }
 }
