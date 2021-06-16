@@ -1,4 +1,5 @@
 package com.company;
+
 import java.util.*;
 
 
@@ -25,13 +26,22 @@ public class Main {
     public static String getWinner(String[] players) {
         String winnerName = "П̸̜̼̤͇̬̼̜̖̫̮̋̀͐͑͊̈́̋͘͝͝ͅа̵̙̳̰̖̬̗̠͉͙̻̜̒̍̿̀̓͑̇̈́͒̅̑͘ш̸̧͐͆̉̆͘к̴̹̹̂̋̾̽̿̚а̴̢̳̫̣̱͎̘̦̩̼́̒̎̽͐̑̏̄̌̕̚͝";
         int maxScore = -666;
-        for (String player : players) {
-            String[] playerAndScoreSplit = player.split("\\s+");
+        HashMap<String, Integer> scoreNameMap = new HashMap<>();
 
-            int score = Integer.parseInt(playerAndScoreSplit[1]);
+        for (String playerScoreString : players) {
+            String[] playerAndScoreSplit = playerScoreString.split("\\s+");
+
+            String name = playerAndScoreSplit[0];
+
+            int previousScore = scoreNameMap.getOrDefault(name, 0);
+            int newScore = Integer.parseInt(playerAndScoreSplit[1]);
+            int score = previousScore + newScore;
+
+            scoreNameMap.put(name, score);
+
             if (maxScore < score) {
                 maxScore = score;
-                winnerName = playerAndScoreSplit[0];
+                winnerName = name;
             }
         }
         return winnerName;
